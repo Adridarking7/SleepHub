@@ -1,0 +1,124 @@
+<style>
+    .container {
+    margin-top: 40px;
+    max-width: 600px;
+    background-color: #f8f9fa;
+    padding: 25px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgb(0 0 0 / 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1 {
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #34495e;
+}
+
+form select,
+form input[type="date"] {
+    width: 100%;
+    padding: 8px 12px;
+    margin-bottom: 18px;
+    border: 1.5px solid #ced4da;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+input[type="submit"] {
+    background-color: #2a4f73;
+    border: none;
+    color: white;
+    font-weight: 700;
+    padding: 10px 20px;
+    font-size: 1.1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.alert {
+    font-weight: 600;
+    font-size: 1rem;
+}
+</style>
+
+<div class="container" style="margin-top: 25px;">
+    <h1>Editar reserva</h1>
+    <div th:if="${error}" class="alert alert-danger" role="alert" style="margin-top: 15px;">
+        <span th:text="${error}"></span>
+    </div>
+
+    <form th:action="@{/reserva/u}" method="post" th:object="${reserva}">
+        <input type="hidden" name="id" th:value="${reserva.id}" />
+
+        <label for="usuario">Usuario:</label>
+        <select id="usuario" name="usuario">
+            <option th:each="u : ${usuarios}" th:value="${u.id}" th:text="${u.nombre}"
+                th:selected="${u.id} == ${reserva.usuario.id}">Usuario</option>
+        </select><br />
+
+        <label for="habitacion">Habitación:</label>
+        <select id="habitacion" name="habitacion">
+            <option th:each="h : ${habitaciones}" th:value="${h.id}" th:text="${h.numero}"
+                th:selected="${h.id} == ${reserva.habitacion.id}">Habitación</option>
+        </select><br />
+
+        <label for="fechaEntrada">Fecha de entrada:</label>
+        <input type="date" id="fechaEntrada" name="fechaEntrada"
+            th:value="${#temporals.format(reserva.fechaEntrada, 'yyyy-MM-dd')}" required><br />
+
+        <label for="fechaSalida">Fecha de salida:</label>
+        <input type="date" id="fechaSalida" name="fechaSalida"
+            th:value="${#temporals.format(reserva.fechaSalida, 'yyyy-MM-dd')}" required><br />
+
+        <input type="submit" value="Actualizar reserva">
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const fechaEntrada = document.querySelector('input[name="fechaEntrada"]');
+        const fechaSalida = document.querySelector('input[name="fechaSalida"]');
+        const hoy = new Date();
+        const hoyStr = hoy.toISOString().split("T")[0];
+
+        // Establecer valores por defecto
+        fechaEntrada.value = hoyStr;
+        fechaEntrada.min = hoyStr;
+
+        const tresDiasDespues = new Date(hoy);
+        tresDiasDespues.setDate(hoy.getDate() + 3);
+        const salidaStr = tresDiasDespues.toISOString().split("T")[0];
+
+        fechaSalida.value = salidaStr;
+        fechaSalida.min = hoyStr;
+
+        fechaEntrada.addEventListener("change", () => {
+            const nuevaMin = fechaEntrada.value;
+            fechaSalida.min = nuevaMin;
+
+            // Si la fecha de salida actual es anterior a la nueva fecha de entrada, actualiza
+            if (fechaSalida.value < nuevaMin) {
+                fechaSalida.value = nuevaMin;
+            }
+        });
+
+        document.querySelector("form").addEventListener("submit", (e) => {
+            if (fechaEntrada.value >= fechaSalida.value) {
+                e.preventDefault();
+                alert("La fecha de salida debe ser posterior a la de entrada.");
+            }
+        });
+    });
+</script>

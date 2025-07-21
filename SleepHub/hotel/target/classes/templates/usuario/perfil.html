@@ -1,0 +1,140 @@
+<div style="max-width: 800px; margin: 0 auto; padding: 30px; font-family: Arial, sans-serif;">
+    <h2 style="color: #cda34f; text-align: center; margin-bottom: 30px; margin-top: 40px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#cda34f" viewBox="0 0 16 16"
+            style="vertical-align: middle; margin-right: 8px;">
+            <path
+                d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm4 8H4a1 1 0 0 1-1-1c0-2.21 3.582-3 5-3s5 .79 5 3a1 1 0 0 1-1 1z" />
+        </svg>
+        Perfil del Cliente
+    </h2>
+    <div th:if="${mensajeExito != null and mensajeExito != ''}"
+        style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c3e6cb;"
+        th:text="${mensajeExito}">
+    </div>
+
+    <!-- Formulario de edición -->
+    <form method="post" action="/usuario/u"
+        style="margin-bottom: 40px; background: #f9f9f9; padding: 20px; border-radius: 10px;">
+        <input type="hidden" name="id" th:value="${usuario.id}" />
+
+        <div style="margin-bottom: 15px;">
+            <label for="nombre"><strong>Nombre:</strong></label>
+            <input type="text" id="nombre" name="nombre" th:value="${nombre != null ? nombre : usuario.nombre}" required
+                style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="email"><strong>Email:</strong></label>
+            <input type="email" id="email" name="email" th:value="${email != null ? email : usuario.email}" required
+                style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="contrasena"><strong>Contraseña (opcional):</strong></label>
+            <div style="position: relative;">
+                <input type="password" id="contrasena" name="contrasena"
+                    placeholder="Dejar en blanco si no desea cambiarla"
+                    style="width: 100%; padding: 8px 40px 8px 8px; border-radius: 6px; border: 1px solid #ccc;">
+                <button type="button" onclick="togglePassword()"
+                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
+                    <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#555"
+                        viewBox="0 0 16 16">
+                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zm-8 3a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <input type="hidden" name="rol" th:value="${rol != null ? rol : usuario.rol}" />
+
+        <button type="submit"
+            style="background-color: #cda34f; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer;">
+            Guardar cambios
+        </button>
+
+        <div th:if="${error != null}" style="color: red; margin-top: 10px;">
+            <p th:text="${error}"></p>
+        </div>
+
+    </form>
+
+    <h3 style="color: #333; margin-bottom: 10px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#333" viewBox="0 0 16 16"
+            style="vertical-align: middle; margin-right: 6px;">
+            <path
+                d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v1H0V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM0 14V5h16v9a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2z" />
+        </svg>
+        Mis reservas
+    </h3>
+
+    <div th:if="${#lists.isEmpty(reservas)}">
+        <p style="color: gray;">No tienes reservas aún.</p>
+    </div>
+
+    <div th:if="${!#lists.isEmpty(reservas)}">
+        <table style="width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.05);">
+            <thead style="background-color: #cda34f; color: black;">
+                <tr>
+                    <th></th>
+                    <th style="padding: 10px;">ID</th>
+                    <th style="padding: 10px;">Habitación</th>
+                    <th style="padding: 10px; width: 200px;">Entrada</th>
+                    <th style="padding: 10px; width: 200px;">Salida</th>
+                    <th style="padding: 10px;">Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="reserva : ${reservas}" style="text-align: center;">
+                    <td th:text="${reserva.id}" style="padding: 10px;"></td>
+                    <td th:text="${reserva.habitacion.numero}" style="padding: 10px;"></td>
+                    <td th:text="${#temporals.format(reserva.fechaEntrada, 'dd/MM/yyyy')}"
+                        style="padding: 10px; width: 200px;"></td>
+                    <td th:text="${#temporals.format(reserva.fechaSalida, 'dd/MM/yyyy')}"
+                        style="padding: 10px; width: 200px;"></td>
+                    <td style="padding: 10px;">
+                        <span th:text="${reserva.estado}"></span>
+                        <form th:if="${reserva.estado.name() != 'CANCELADA'}" method="post"
+                            action="/usuario/cancelar-reserva" style="display:inline;">
+                            <input type="hidden" name="idReserva" th:value="${reserva.id}" />
+                            <button type="submit" style="background: none; border: none; cursor: pointer;"
+                                title="Cancelar reserva">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red"
+                                    viewBox="0 0 16 16">
+                                    <path
+                                        d="M5.5 5.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0v-5a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0v-5a.5.5 0 0 1 .5-.5z" />
+                                    <path
+                                        d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1 0-2h3.086a1 1 0 0 1 .707.293l.707.707h2.414l.707-.707A1 1 0 0 1 10.414 1H13.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118z" />
+                                </svg>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+
+        </table>
+    </div>
+</div>
+
+<script>
+    // Espera 3 segundos y luego oculta el mensaje
+    setTimeout(() => {
+        const successMsg = document.querySelector('[th\\:if="${param.exito}"]');
+        if (successMsg) {
+            successMsg.style.transition = 'opacity 0.5s ease-out';
+            successMsg.style.opacity = '0';
+            setTimeout(() => successMsg.remove(), 500); // Elimina del DOM tras el fade-out
+        }
+    }, 3000);
+</script>
+<script>
+    function togglePassword() {
+        const input = document.getElementById("contrasena");
+        const icon = document.getElementById("eyeIcon");
+        const isVisible = input.type === "text";
+
+        input.type = isVisible ? "password" : "text";
+        icon.innerHTML = isVisible
+            ? `<path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zm-8 3a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>`
+            : `<path d="M13.359 11.238C14.149 10.442 14.817 9.553 15.354 8.7a.5.5 0 0 0 0-.4C14.725 6.885 12.035 3.5 8 3.5a6.978 6.978 0 0 0-3.712 1.063l.776.776A5.978 5.978 0 0 1 8 4.5c3.192 0 5.647 2.857 6.32 3.5-.319.36-.905.957-1.641 1.592l.68.646zM2.354 1.146a.5.5 0 1 0-.708.708l1.761 1.761C1.99 4.384.906 6.03.646 6.3a.5.5 0 0 0 0 .4C1.275 9.115 3.965 12.5 8 12.5a6.978 6.978 0 0 0 3.712-1.063l1.934 1.934a.5.5 0 0 0 .708-.708l-12-12zm4.168 5.584 2.748 2.748A1.5 1.5 0 0 1 6.5 8a1.5 1.5 0 0 1 .022-.27zm4.728 4.728-1.06-1.06a2.5 2.5 0 0 0-3.436-3.436L5.687 5.9a3.5 3.5 0 0 1 4.563 4.563z"/>`;
+    }
+</script>

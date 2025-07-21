@@ -1,0 +1,100 @@
+<h2>Nuestros Servicios</h2>
+<p class="descripcion">
+    En SleepHub, combinamos comodidad y calidad para ofrecerle una experiencia completa.
+    Descubra todos los servicios que ponemos a su disposición.
+</p>
+
+<div class="grid-servicios">
+    <div class="tarjeta-servicio">
+        <img src="/img/servicios/wifi.png" alt="Wi-Fi Gratis" class="imagen-servicio">
+        <div class="contenido-servicio">
+            <h3>Wi-Fi Gratis</h3>
+            <p>Disfrute de conexión rápida y estable en todo el hotel.</p>
+        </div>
+    </div>
+
+    <div class="tarjeta-servicio">
+        <img src="/img/servicios/desayuno.png" alt="Desayuno incluido" class="imagen-servicio">
+        <div class="contenido-servicio">
+            <h3>Desayuno Incluido</h3>
+            <p>Comience el día con energía gracias a nuestro desayuno buffet variado.</p>
+        </div>
+    </div>
+
+    <div class="tarjeta-servicio">
+        <img src="/img/servicios/parking.png" alt="Parking Privado" class="imagen-servicio">
+        <div class="contenido-servicio">
+            <h3>Parking Privado</h3>
+            <p>Aparcamiento seguro las 24 horas, exclusivo para clientes.</p>
+        </div>
+    </div>
+
+    <div class="tarjeta-servicio">
+        <img src="/img/servicios/gimnasio.png" alt="Gimnasio 24h" class="imagen-servicio">
+        <div class="contenido-servicio">
+            <h3>Gimnasio 24h</h3>
+            <p>Entrene cuando lo desee en nuestro gimnasio completamente equipado.</p>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    h2 {
+        text-align: center;
+        color: #12054a;
+        margin-top: 70px;
+    }
+
+    .descripcion {
+        text-align: center;
+        max-width: 700px;
+        margin: 10px auto 40px;
+        font-size: 17px;
+        color: #555;
+    }
+
+    .grid-servicios {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+        max-width: 1100px;
+        margin: auto;
+        padding: 0 20px 60px;
+    }
+
+    .tarjeta-servicio {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .tarjeta-servicio:hover {
+        transform: translateY(-6px);
+    }
+
+    .imagen-servicio {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .contenido-servicio {
+        padding: 20px;
+        text-align: center;
+    }
+
+    .contenido-servicio h3 {
+        color: #cda34f;
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+
+    .contenido-servicio p {
+        color: #444;
+        font-size: 15px;
+        line-height: 1.5;
+    }
+</style>

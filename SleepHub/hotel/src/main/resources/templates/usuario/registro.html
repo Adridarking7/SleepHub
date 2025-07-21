@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Registro</title>
+    <link rel="stylesheet" href="/css/index.css" />
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        main {
+            max-width: 400px;
+            margin: 100px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #1e3d59;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #1e3d59;
+        }
+
+        button[type="submit"] {
+            background-color: #1e3d59;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #2a4f73;
+            transform: translateY(-2px);
+        }
+
+        p {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.95rem;
+        }
+
+        p a {
+            color: #ffc13b;
+            font-weight: bold;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        p a:hover {
+            color: #e0a800;
+        }
+    </style>
+</head>
+
+<body>
+
+    <main>
+        <h2>Registrarse</h2>
+        <p th:if="${error}" th:text="${error}" style="color: red; text-align: center; margin-top: 80px;"></p>
+
+        <form method="post" action="/usuario/registro">
+            <div class="form-group">
+                <label for="nombre">Nombre:</label>
+                <input type="text" name="nombre" id="nombre" required />
+            </div>
+            <div class="form-group">
+                <label for="email">Correo electrónico:</label>
+                <input type="email" name="email" id="email" required />
+            </div>
+            <div class="form-group">
+                <label for="contrasena">Contraseña:</label>
+                <input type="password" name="contrasena" id="contrasena" required />
+            </div>
+            <div class="form-group">
+                <label for="contrasena2">Repite la contraseña:</label>
+                <input type="password" name="contrasena2" id="contrasena2" required />
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" id="mostrar" onclick="togglePasswords()" />
+                <label for="mostrar">Mostrar contraseñas</label>
+            </div>
+            <button type="submit">Registrarse</button>
+        </form>
+
+
+        <p>¿Ya tienes cuenta? <a href="/usuario/login">Inicia sesión</a></p>
+    </main>
+
+</body>
+
+</html>
+
+<script>
+    function togglePasswords() {
+        const pass1 = document.getElementById("contrasena");
+        const pass2 = document.getElementById("contrasena2");
+
+        const type = pass1.type === "password" ? "text" : "password";
+        pass1.type = type;
+        pass2.type = type;
+    }
+</script>
+<script>
+    const campos = ["nombre", "email", "contrasena", "contrasena2"];
+
+    // Guardar valores al escribir
+    campos.forEach(id => {
+        const input = document.getElementById(id);
+        input.addEventListener("input", () => {
+            sessionStorage.setItem("registro_" + id, input.value);
+        });
+    });
+
+    // Al cargar la página, restaurar valores si existen
+    window.onload = () => {
+        campos.forEach(id => {
+            const input = document.getElementById(id);
+            const guardado = sessionStorage.getItem("registro_" + id);
+            if (guardado) input.value = guardado;
+        });
+
+        // Si el formulario se envía correctamente, limpiar storage
+        const form = document.querySelector("form");
+        form.addEventListener("submit", () => {
+            campos.forEach(id => sessionStorage.removeItem("registro_" + id));
+        });
+    };
+</script>

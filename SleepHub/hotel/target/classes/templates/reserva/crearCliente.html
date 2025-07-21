@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="es">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Hacer una Reserva</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 40px;
+        }
+
+        h2 {
+            color: #1e3d59;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        form {
+            max-width: 700px;
+            margin: auto;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+        }
+
+        .habitacion-info {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .habitacion-info img {
+            width: 250px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .habitacion-texto {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #1e3d59;
+        }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-top: 5px;
+        }
+
+        button {
+            margin-top: 25px;
+            background-color: #1e3d59;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #cda34f;
+            color: #1e3d59;
+        }
+
+        .servicios-habitacion {
+            margin: 20px 0;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .servicios-habitacion h4 {
+            margin-bottom: 10px;
+            color: #1e3d59;
+        }
+
+        .servicios-lista {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .servicios-lista li {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .servicios-lista i {
+            font-size: 20px;
+            color: #1e3d59;
+            margin-right: 10px;
+        }
+
+        .btn-disponible {
+            margin-top: 20px;
+            background-color: #1e3d59;
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-disponible:hover {
+            background-color: #cda34f;
+            color: #1e3d59;
+        }
+
+        .disponible {
+            background: #28a745;
+            color: white;
+        }
+
+        .ocupada {
+            background: #dc3545;
+            color: white;
+        }
+
+        #calendarioFechas table td {
+            width: 36px;
+            height: 36px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 16px;
+        }
+
+        #calendarioFechas {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        #modalDisponibilidad>div {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Hacer una Reserva</h2>
+
+    <form method="post" id="formularioReserva" onsubmit="return false;">
+        <input type="hidden" name="habitacion" th:value="${habitacionSeleccionada.id}"
+            th:attr="data-precio=${habitacionSeleccionada.precio}" />
+
+        <div class="habitacion-info" th:if="${habitacionSeleccionada != null}">
+            <div id="carouselHabitacion" class="carousel slide" data-bs-ride="carousel"
+                style="width: 250px; height: 180px;">
+                <div class="carousel-inner" th:if="${!#lists.isEmpty(habitacionSeleccionada.imagenes)}">
+                    <div th:each="img, iter : ${habitacionSeleccionada.imagenes}"
+                        th:class="${iter.index == 0} ? 'carousel-item active' : 'carousel-item'">
+                        <img th:src="${img.url}" class="d-block w-100"
+                            style="object-fit: cover; height: 180px; border-radius: 8px;" />
+                    </div>
+                </div>
+                <div th:if="${#lists.isEmpty(habitacionSeleccionada.imagenes)}" class="carousel-inner">
+                    <div class="carousel-item active">
+                        <img src="/img/habitacion-default.jpg" class="d-block w-100"
+                            style="object-fit: cover; height: 180px; border-radius: 8px;" />
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselHabitacion"
+                    data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselHabitacion"
+                    data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="habitacion-texto">
+                <p>
+                    <strong>Habitación:</strong>
+                    <span th:text="${habitacionSeleccionada.numero} + ' - ' + ${habitacionSeleccionada.tipo}"></span>
+                </p>
+                <p th:text="${habitacionSeleccionada.descripcion}"></p>
+                <p>
+                    <strong>Capacidad:</strong>
+                    <span th:text="${habitacionSeleccionada.capacidad} + ' personas'"></span>
+                </p>
+            </div>
+        </div>
+
+
+        <!-- Servicios -->
+        <div class="servicios-habitacion">
+            <h4>Servicios incluidos</h4>
+
+            <ul th:if="${habitacionSeleccionada.tipo.name() == 'INDIVIDUAL'}" class="servicios-lista">
+                <li><i class="bi bi-wifi"></i> Wifi gratuito</li>
+                <li><i class="bi bi-tv"></i> Televisión</li>
+                <li><i class="bi bi-cup-straw"></i> Servicio de bebidas</li>
+            </ul>
+
+            <ul th:if="${habitacionSeleccionada.tipo.name() == 'DOBLE'}" class="servicios-lista">
+                <li><i class="bi bi-wifi"></i> Wifi gratuito</li>
+                <li><i class="bi bi-tv"></i> Televisión HD</li>
+                <li><i class="bi bi-cup-straw"></i> Minibar</li>
+                <li><i class="bi bi-snow"></i> Aire acondicionado</li>
+            </ul>
+
+            <ul th:if="${habitacionSeleccionada.tipo.name() == 'SUITE'}" class="servicios-lista">
+                <li><i class="bi bi-wifi"></i> Wifi Premium</li>
+                <li><i class="bi bi-tv"></i> Televisión Smart 4K</li>
+                <li><i class="bi bi-cup-straw"></i> Bebidas y snacks ilimitados</li>
+                <li><i class="bi bi-snow"></i> Aire acondicionado</li>
+                <li><i class="bi bi-hot"></i> Jacuzzi privado</li>
+                <li><i class="bi bi-badge-ad"></i> Desayuno incluido</li>
+            </ul>
+        </div>
+
+        <label for="fechaEntrada">Fecha de entrada:</label>
+        <input type="date" name="fechaEntrada" id="fechaEntrada" required />
+
+        <label for="fechaSalida">Fecha de salida:</label>
+        <input type="date" name="fechaSalida" id="fechaSalida" required />
+
+        <!-- Botón Ver disponibilidad -->
+        <div style="text-align: center; margin-top: 10px;">
+            <button type="button" class="btn-disponible"
+                th:attr="onclick=|mostrarDisponibilidad('${habitacionSeleccionada.tipo}', '${habitacionSeleccionada.numero}', '${habitacionSeleccionada.fechasDisponiblesString}')|">
+                Ver disponibilidad
+            </button>
+        </div>
+
+        <button type="button" onclick="abrirPago()">Reservar</button>
+    </form>
+    <div class="mt-4">
+        <h5 class="mb-3"><i class="bi bi-chat-left-text"></i> Reseñas de la habitación</h5>
+
+        <div th:if="${resenas != null and !resenas.isEmpty()}">
+            <div th:each="resena : ${resenas}" class="border p-3 rounded mb-3 shadow-sm bg-light">
+                <div class="d-flex justify-content-between">
+                    <strong th:text="${resena.nombre}">Nombre del usuario</strong>
+                    <span class="text-warning">
+                        <i class="bi bi-star-fill" th:each="i : ${#numbers.sequence(1, resena.puntuacion)}"></i>
+                    </span>
+                </div>
+
+
+
+                <small class="text-muted"
+                    th:text="${#temporals.format(resena.fecha.toLocalDate(), 'dd/MM/yyyy')}">Fecha</small>
+                <p class="mt-2" th:text="${resena.comentario}">Comentario aquí</p>
+            </div>
+        </div>
+
+        <div th:if="${resenas == null or resenas.isEmpty()}">
+            <p class="text-muted">Esta habitación aún no tiene reseñas.</p>
+        </div>
+    </div>
+
+
+    <!-- Formulario de Reseña -->
+    <div th:if="${session.usuario != null and session.usuario.rol.name() == 'CLIENTE'}" style="margin-top: 40px;">
+        <h4 style="color:#1e3d59;">Déjanos tu reseña</h4>
+        <form method="post" action="/resena/crear">
+            <input type="hidden" name="habitacionId" th:value="${habitacionSeleccionada.id}" />
+
+            <div class="mb-3">
+                <label for="comentario" class="form-label">Comentario:</label>
+                <textarea id="comentario" name="comentario" class="form-control" rows="4" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="valoracion" class="form-label">Valoración:</label>
+                <select id="valoracion" name="puntuacion" class="form-select" required>
+                    <option value="">Seleccione</option>
+                    <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                    <option value="4">⭐⭐⭐⭐ Muy buena</option>
+                    <option value="3">⭐⭐⭐ Buena</option>
+                    <option value="2">⭐⭐ Regular</option>
+                    <option value="1">⭐ Mala</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-chat-left-text"></i> Enviar reseña
+            </button>
+        </form>
+    </div>
+
+
+    <!-- Modal -->
+    <div id="modalDisponibilidad"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); align-items:center; justify-content:center; z-index:9999;">
+        <div style="background:white; padding:30px; border-radius:10px; min-width:300px; position:relative;">
+            <span style="position:absolute; top:10px; right:15px; cursor:pointer; font-size:22px;"
+                onclick="cerrarModal()">&times;</span>
+            <h3 id="tituloModal"></h3>
+            <div id="calendarioFechas"></div>
+        </div>
+    </div>
+    <!-- Modal de Pago -->
+    <div id="modalPago"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+        <div style="background:white; padding:30px; border-radius:10px; width:90%; max-width:450px; position:relative;">
+            <span onclick="cerrarPago()"
+                style="position:absolute; top:10px; right:15px; cursor:pointer; font-size:22px; color:#1e3d59;">&times;</span>
+            <h3 style="text-align:center; margin-bottom:20px; color:#1e3d59;">Pago de la Reserva</h3>
+            <p id="precioReserva"
+                style="text-align:center; font-size:18px; color:#1e3d59; font-weight:bold; margin-bottom:20px;"></p>
+
+            <form id="formularioPago">
+                <!-- Nombre del titular -->
+                <div style="margin-bottom:15px; position:relative;">
+                    <label style="display:block; margin-bottom:5px; color:#1e3d59; font-weight:bold;">
+                        <i class="bi bi-person-fill" style="margin-right:8px;"></i>Nombre del titular
+                    </label>
+                    <input type="text" id="nombreTitular" required placeholder="Ej: Juan Pérez"
+                        style="width:100%; padding:12px 12px 12px 40px; border-radius:6px; border:1px solid #ccc; font-size:16px;"
+                        pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]{3,}" />
+                    <i class="bi bi-person"
+                        style="position:absolute; left:12px; top:35px; font-size:18px; color:#1e3d59;"></i>
+                </div>
+
+                <!-- Número de tarjeta -->
+                <div style="margin-bottom:15px; position:relative;">
+                    <label style="display:block; margin-bottom:5px; color:#1e3d59; font-weight:bold;">
+                        <i class="bi bi-credit-card-fill" style="margin-right:8px;"></i>Número de tarjeta
+                    </label>
+                    <input type="text" id="numeroTarjeta" maxlength="19" required placeholder="1234 5678 9012 3456"
+                        style="width:100%; padding:12px 12px 12px 40px; border-radius:6px; border:1px solid #ccc; font-size:16px;"
+                        pattern="[\d\s]{16,19}" />
+                    <i class="bi bi-credit-card"
+                        style="position:absolute; left:12px; top:35px; font-size:18px; color:#1e3d59;"></i>
+                    <div id="tarjetasIconos" style="display:flex; gap:8px; margin-top:8px;">
+                        <img src="https://cdn-icons-png.flaticon.com/512/196/196578.png" width="30" alt="Visa"
+                            style="display:none;">
+                        <img src="https://cdn-icons-png.flaticon.com/512/196/196561.png" width="30" alt="Mastercard"
+                            style="display:none;">
+                        <img src="https://cdn-icons-png.flaticon.com/512/196/196566.png" width="30"
+                            alt="American Express" style="display:none;">
+                    </div>
+                </div>
+
+                <!-- Fecha de caducidad y CVC -->
+                <div style="display:flex; gap:15px; margin-bottom:15px;">
+                    <div style="flex:1; position:relative;">
+                        <label style="display:block; margin-bottom:5px; color:#1e3d59; font-weight:bold;">
+                            <i class="bi bi-calendar-fill" style="margin-right:8px;"></i>Caducidad
+                        </label>
+                        <input type="text" id="fechaCaducidad" required placeholder="MM/AA"
+                            style="width:100%; padding:12px 12px 12px 40px; border-radius:6px; border:1px solid #ccc; font-size:16px;"
+                            maxlength="5" pattern="(0[1-9]|1[0-2])\/\d{2}" />
+                        <i class="bi bi-calendar"
+                            style="position:absolute; left:12px; top:35px; font-size:18px; color:#1e3d59;"></i>
+                    </div>
+                    <div style="flex:1; position:relative;">
+                        <label style="display:block; margin-bottom:5px; color:#1e3d59; font-weight:bold;">
+                            <i class="bi bi-lock-fill" style="margin-right:8px;"></i>CVC
+                        </label>
+                        <input type="text" id="cvc" maxlength="4" required placeholder="123"
+                            style="width:100%; padding:12px 12px 12px 40px; border-radius:6px; border:1px solid #ccc; font-size:16px;"
+                            pattern="\d{3,4}" />
+                        <i class="bi bi-lock"
+                            style="position:absolute; left:12px; top:35px; font-size:18px; color:#1e3d59;"></i>
+                    </div>
+                </div>
+
+                <!-- Botón de pago -->
+                <button type="submit"
+                    style="width:100%; background:#1e3d59; color:white; padding:14px; border-radius:8px; cursor:pointer; font-size:16px; font-weight:bold; margin-top:10px; border:none; display:flex; align-items:center; justify-content:center; gap:10px;">
+                    <i class="bi bi-check-circle-fill"></i> Pagar y confirmar reserva
+                </button>
+            </form>
+        </div>
+    </div>
+    <!-- Modal Confirmación -->
+    <div id="modalConfirmacion"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+        <div style="background:white; padding:30px; border-radius:10px; width:90%; max-width:500px; position:relative;">
+            <h3 style="text-align:center; color:#1e3d59;">✅ Reserva Confirmada</h3>
+            <div style="margin-top:20px; font-size:16px; color:#333;">
+                <p><strong>Habitación:</strong> <span id="confHabitacion"></span></p>
+                <p><strong>Fecha de entrada:</strong> <span id="confEntrada"></span></p>
+                <p><strong>Fecha de salida:</strong> <span id="confSalida"></span></p>
+                <p><strong>Precio total:</strong> <span id="confPrecio"></span></p>
+            </div>
+            <button onclick="redirigirPerfil()"
+                style="margin-top:25px; width:100%; background-color:#1e3d59; color:white; padding:12px; border:none; border-radius:8px; font-size:16px; cursor:pointer;">
+                Ir a mi perfil
+            </button>
+        </div>
+    </div>
+
+</body>
+<script>
+    // Validación y formato del número de tarjeta
+    document.getElementById('numeroTarjeta').addEventListener('input', function (e) {
+        // Formatear con espacios cada 4 dígitos
+        let value = e.target.value.replace(/\s+/g, '').replace(/\D/g, '');
+        let formatted = '';
+        for (let i = 0; i < value.length; i++) {
+            if (i > 0 && i % 4 === 0) formatted += ' ';
+            formatted += value[i];
+        }
+        e.target.value = formatted;
+
+        // Mostrar icono del tipo de tarjeta
+        const tarjetaIconos = document.getElementById('tarjetasIconos');
+        const visa = tarjetaIconos.children[0];
+        const mastercard = tarjetaIconos.children[1];
+        const amex = tarjetaIconos.children[2];
+
+        // Ocultar todos primero
+        visa.style.display = 'none';
+        mastercard.style.display = 'none';
+        amex.style.display = 'none';
+
+        // Mostrar según el primer dígito
+        const firstDigit = value[0];
+        if (firstDigit === '4') {
+            visa.style.display = 'block';
+        } else if (firstDigit === '5') {
+            mastercard.style.display = 'block';
+        } else if (firstDigit === '3') {
+            amex.style.display = 'block';
+        }
+    });
+
+    // Formato automático para fecha de caducidad (MM/AA)
+    document.getElementById('fechaCaducidad').addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        e.target.value = value;
+    });
+
+    // Validación del formulario
+    document.getElementById('formularioPago').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const nombre = document.getElementById('nombreTitular').value.trim();
+        const numeroTarjeta = document.getElementById('numeroTarjeta').value.replace(/\s+/g, '');
+        const fechaCaducidad = document.getElementById('fechaCaducidad').value;
+        const cvc = document.getElementById('cvc').value;
+
+        if (!nombre || !numeroTarjeta || !fechaCaducidad || !cvc) {
+            alert("❌ Todos los campos de pago son obligatorios.");
+            return;
+        }
+
+        const [mm, aa] = fechaCaducidad.split('/');
+        const ahora = new Date();
+        const mesActual = ahora.getMonth() + 1;
+        const añoActual = ahora.getFullYear() % 100;
+
+        if (!mm || !aa || parseInt(aa) < añoActual || (parseInt(aa) === añoActual && parseInt(mm) < mesActual)) {
+            alert("❌ La tarjeta está caducada.");
+            return;
+        }
+
+        if (!/^\d{3,4}$/.test(cvc)) {
+            alert("❌ El CVC debe tener 3 o 4 cifras.");
+            return;
+        }
+
+        cerrarPago();
+
+        const fechaEntrada = document.getElementById('fechaEntrada').value;
+        const fechaSalida = document.getElementById('fechaSalida').value;
+        const precio = parseFloat(document.querySelector('[name="habitacion"]').getAttribute('data-precio') || 0);
+        const habitacionId = document.querySelector('[name="habitacion"]').value;
+        const habitacionInfo = document.querySelector('.habitacion-texto span')?.textContent || 'Desconocida';
+
+        try {
+            const response = await fetch('/reserva/crear/api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'fetch'
+                },
+                body: JSON.stringify({
+                    habitacion: habitacionId,
+                    fechaEntrada,
+                    fechaSalida
+                })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || 'Error al crear la reserva');
+            }
+
+            // ✅ Solo si la reserva fue creada correctamente
+            alert("✅ Pago completado con éxito. Procediendo a la reserva...");
+
+            document.getElementById('confHabitacion').textContent = habitacionInfo;
+            document.getElementById('confEntrada').textContent = fechaEntrada;
+            document.getElementById('confSalida').textContent = fechaSalida;
+            document.getElementById('confPrecio').textContent = `${precio.toFixed(2)} €`;
+            document.getElementById('modalConfirmacion').style.display = 'flex';
+
+        } catch (error) {
+            alert(`❌ No se pudo realizar la reserva: ${error.message}`);
+        }
+    });
+
+
+    // Algoritmo de Luhn para validar tarjetas
+    function validarTarjeta(numero) {
+        if (!/^\d{13,16}$/.test(numero)) return false;
+    }
+</script>
+<!-- Scripts -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const fechaEntrada = document.querySelector('input[name="fechaEntrada"]');
+        const fechaSalida = document.querySelector('input[name="fechaSalida"]');
+        const hoy = new Date();
+        const hoyStr = hoy.toISOString().split("T")[0];
+
+        // Establecer valores por defecto
+        fechaEntrada.value = hoyStr;
+        fechaEntrada.min = hoyStr;
+
+        const tresDiasDespues = new Date(hoy);
+        tresDiasDespues.setDate(hoy.getDate() + 3);
+        const salidaStr = tresDiasDespues.toISOString().split("T")[0];
+
+        fechaSalida.value = salidaStr;
+        fechaSalida.min = hoyStr;
+
+        fechaEntrada.addEventListener("change", () => {
+            fechaSalida.min = fechaEntrada.value;
+        });
+
+        document.querySelector("form").addEventListener("submit", (e) => {
+            if (fechaEntrada.value >= fechaSalida.value) {
+                e.preventDefault();
+                alert("La fecha de salida debe ser posterior a la de entrada.");
+            }
+        });
+    });
+
+    function mostrarDisponibilidad(tipo, numero, fechasDisponibles) {
+        document.getElementById('tituloModal').innerText = `Disponibilidad Habitación ${tipo} - ${numero}`;
+        console.log("Fechas disponibles que llegan:", fechasDisponibles);
+
+        // ✅ Mejora: comprobamos que fechasDisponibles esté bien antes de usarlo
+        let fechas = [];
+        if (typeof fechasDisponibles === 'string' && fechasDisponibles.trim() !== '' && fechasDisponibles !== 'null') {
+            fechas = fechasDisponibles.split(',').map(f => f.trim());
+        }
+
+        const fechasSet = new Set(fechas);
+        const hoy = new Date();
+        let year = hoy.getFullYear();
+        let month = hoy.getMonth();
+        let numMeses = 3;
+        let html = '';
+
+        for (let m = 0; m < numMeses; m++) {
+            let fechaMes = new Date(year, month + m, 1);
+            let mesActual = fechaMes.getMonth();
+            let anioActual = fechaMes.getFullYear();
+
+            html += `<h4 style="margin-top:20px; text-align:center;">${fechaMes.toLocaleString('es-ES', { month: 'long', year: 'numeric' })}</h4>`;
+            html += '<table style="width:100%; text-align:center;"><tr>';
+            const diasSemana = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+            diasSemana.forEach(d => html += `<th>${d}</th>`);
+            html += '</tr><tr>';
+
+            let primerDia = new Date(anioActual, mesActual, 1).getDay();
+            let diaSemana = primerDia === 0 ? 6 : primerDia - 1;
+
+            for (let i = 0; i < diaSemana; i++) html += '<td></td>';
+
+            let diasMes = new Date(anioActual, mesActual + 1, 0).getDate();
+            for (let dia = 1; dia <= diasMes; dia++) {
+                const fechaActual = new Date(anioActual, mesActual, dia);
+                const hoySinHoras = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+
+                // Solo mostrar días anteriores a hoy si es de meses posteriores o el mismo mes pero después del día actual
+                if (m > 0 || fechaActual >= hoySinHoras) {
+                    const fechaStr = `${anioActual}-${String(mesActual + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+                    let clase = fechasSet.has(fechaStr) ? 'disponible' : 'ocupada';
+                    html += `<td class="${clase}" style="padding:6px; border-radius:4px;">${dia}</td>`;
+                } else {
+                    html += '<td></td>'; // Día pasado (hoy o anterior), no se muestra como reservable
+                }
+
+                diaSemana++;
+                if (diaSemana > 6 && dia !== diasMes) {
+                    html += '</tr><tr>';
+                    diaSemana = 0;
+                }
+            }
+
+            html += '</tr></table>';
+        }
+
+        html += `
+        <div style="margin-top:10px;">
+            <span style="display:inline-block;width:16px;height:16px;background:#28a745;border-radius:3px;margin-right:5px;"></span> Disponible
+            <span style="display:inline-block;width:16px;height:16px;background:#dc3545;border-radius:3px;margin:0 5px 0 15px;"></span> Ocupada
+        </div>`;
+
+        document.getElementById('calendarioFechas').innerHTML = html;
+        document.getElementById('modalDisponibilidad').style.display = 'flex';
+    }
+
+    function cerrarModal() {
+        document.getElementById('modalDisponibilidad').style.display = 'none';
+    }
+</script>
+<script>
+    function abrirPago() {
+        const entrada = document.getElementById('fechaEntrada').value;
+        const salida = document.getElementById('fechaSalida').value;
+        const precio = parseFloat(document.querySelector('[name="habitacion"]').getAttribute('data-precio') || 0);
+        document.getElementById('precioReserva').textContent = `Total a pagar: ${precio.toFixed(2)} €`;
+
+        if (!entrada || !salida) {
+            alert("Debe seleccionar la fecha de entrada y salida antes de continuar.");
+            return;
+        }
+
+        if (entrada >= salida) {
+            alert("La fecha de salida debe ser posterior a la de entrada.");
+            return;
+        }
+
+        document.getElementById('modalPago').style.display = 'flex';
+    }
+
+    function cerrarPago() {
+        document.getElementById('modalPago').style.display = 'none';
+    }
+
+    // Al enviar el formulario ficticio de pago
+
+
+    function redirigirPerfil() {
+        window.location.href = "/usuario/perfil";
+    }
+
+</script>
+
+</html>

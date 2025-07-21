@@ -1,0 +1,139 @@
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f8fa;
+        color: #333;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 400px;
+        background: #fff;
+        padding: 30px 40px;
+        margin: 40px auto;
+        margin-top: 165px;
+        border-radius: 10px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        text-align: center;
+        color: #1e3d59;
+        margin-bottom: 25px;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    label {
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #1e3d59;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        padding: 10px 12px;
+        font-size: 1rem;
+        border: 1.8px solid #ccc;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+        outline: none;
+        border-color: #1e3d59;
+        box-shadow: 0 0 8px rgba(30, 61, 89, 0.3);
+    }
+
+    /* Estilo para el grupo de radios */
+    .radio-group {
+        margin-bottom: 20px;
+    }
+
+    .radio-label {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 15px;
+        cursor: pointer;
+        color: #444;
+        user-select: none;
+        font-weight: 500;
+        line-height: 1;
+    }
+
+    .radio-label input[type="radio"] {
+        margin-right: 6px;
+        cursor: pointer;
+        transform: scale(1.1);
+        vertical-align: middle;
+    }
+
+    input[type="submit"] {
+        background-color: #1e3d59;
+        color: white;
+        font-weight: 700;
+        border: none;
+        padding: 12px 0;
+        font-size: 1.1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    input[type="submit"]:hover {
+        background-color: #16304a;
+    }
+</style>
+
+<div class="container">
+    <h1>Nuevo usuario</h1>
+
+    <div>
+        <h1>Crear Usuario</h1>
+
+        <!-- Mensaje de error -->
+        <div style="color: red;" th:if="${error}">
+            <p th:text="${error}"></p>
+        </div>
+
+        <!-- formulario aquí -->
+    </div>
+
+    <form action="/usuario/c" method="post">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="contrasena">Contraseña:</label>
+        <input type="password" id="contrasena" name="contrasena" required>
+
+        <label>Tipo de usuario:</label>
+
+        <div class="radio-group">
+            <label class="radio-label">
+                <input type="radio" name="tipo" value="CLIENTE" checked>
+                Cliente
+            </label>
+            <label class="radio-label">
+                <input type="radio" name="tipo" value="EDITOR">
+                Editor
+            </label>
+            <label class="radio-label">
+                <input type="radio" name="tipo" value="ADMINISTRADOR">
+                Administrador
+            </label>
+        </div>
+
+        <input type="submit" value="Crear usuario">
+    </form>
+</div>

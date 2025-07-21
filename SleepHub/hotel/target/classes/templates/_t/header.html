@@ -1,0 +1,247 @@
+<div th:fragment="header">
+	<header class="sticky-header">
+		<style>
+			/* ENCABEZADO FIJO */
+			.sticky-header {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				z-index: 1000;
+				background-color: #1e3d59;
+				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+			}
+
+			.header-container {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 15px 30px;
+				position: relative;
+			}
+
+			.logo-link {
+				flex: 1;
+				/* Ocupa espacio a la izquierda */
+			}
+
+			.main-nav {
+				position: absolute;
+				left: 50%;
+				transform: translateX(-50%);
+				display: flex;
+				gap: 20px;
+			}
+
+			.auth-section {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+
+			.main-nav a {
+				margin-left: 20px;
+				color: white;
+				text-decoration: none;
+				transition: color 0.3s;
+				font-weight: 500;
+			}
+
+			.main-nav a:hover {
+				color: #cda34f;
+			}
+
+			.auth-btn {
+				display: inline-flex;
+				align-items: center;
+				background-color: #1e1e1e;
+				color: white;
+				padding: 6px 12px;
+				border-radius: 6px;
+				margin-left: 10px;
+				text-decoration: none;
+				font-weight: 500;
+				transition: background-color 0.2s, color 0.2s;
+			}
+
+			.auth-btn:hover {
+				background-color: #cda34f;
+				color: #000;
+			}
+
+			.auth-btn svg {
+				margin-right: 6px;
+			}
+
+			.text-white {
+				color: white;
+				margin-right: 10px;
+				font-weight: bold;
+			}
+
+			body {
+				padding-top: 80px;
+			}
+
+			/* Estilos para el menú hamburguesa */
+
+			.hamburger {
+				display: flex;
+				flex-direction: column;
+				justify-content: space-around;
+				width: 24px;
+				height: 20px;
+				cursor: pointer;
+				margin-left: 20px;
+				margin-top: 8px;
+			}
+
+			.hamburger span {
+				display: block;
+				height: 3px;
+				background-color: white;
+				border-radius: 2px;
+				transition: all 0.3s ease;
+			}
+
+			.hamburger:hover span {
+				background-color: #cda34f;
+				transition: background-color 0.3s ease;
+			}
+
+			/* Cambios visuales cuando está activo el menú hamburguesa */
+			.hamburger.active span:nth-child(1) {
+				transform: rotate(45deg) translate(5px, 5px);
+			}
+
+			.hamburger.active span:nth-child(2) {
+				opacity: 0;
+			}
+
+			.hamburger.active span:nth-child(3) {
+				transform: rotate(-45deg) translate(5px, -5px);
+			}
+
+			.dropdown-menu {
+				position: absolute;
+				top: 40px;
+				right: -230px;
+				/* Ajusta este valor para moverlo más a la derecha */
+				background-color: #1e1e1e !important;
+				border-radius: 6px;
+				box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+				overflow: hidden;
+				opacity: 0;
+				visibility: hidden;
+				transform: translateY(-10px);
+				transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+				z-index: 1500;
+				min-width: 160px;
+			}
+
+			.dropdown-menu.show {
+				opacity: 1;
+				visibility: visible;
+				transform: translateY(0);
+			}
+
+			.dropdown-menu a {
+				display: block;
+				padding: 10px 20px;
+				color: white !important;
+				text-decoration: none;
+				font-weight: 500;
+				transition: background-color 0.2s, color 0.2s;
+			}
+
+			.dropdown-menu a:hover {
+				color: #cda34f;
+			}
+		</style>
+
+		<div class="header-container">
+			<!-- Zona izquierda: Logo y navegación -->
+			<div class="logo-nav">
+				<h1>
+					<a href="/" class="logo-link" style="display: flex; align-items: center; gap: 8px;">
+						<img src="/img/SleepHub.png" alt="Logo SleepHub" style="height: 65px; width: auto;">SleepHub
+					</a>
+				</h1>
+				<nav class="main-nav">
+					<a href="/">Inicio</a>
+					<a href="/#habitaciones-individuales">Habitaciones</a>
+					<a href="/servicios">Servicios</a>
+					<a href="/#contacto">Contacto</a>
+
+					<!-- Menú Hamburguesa (solo admin/editor) -->
+					<div class="admin-menu"
+						th:if="${session.usuario != null and (session.usuario.rol.name() == 'ADMINISTRADOR' or session.usuario.rol.name() == 'EDITOR')}">
+						<div class="hamburger" id="hamburger-menu" aria-label="Menú desplegable" role="button"
+							tabindex="0">
+							<span></span>
+							<span></span>
+							<span></span>
+						</div>
+						<div class="dropdown-menu" id="dropdown-menu">
+							<a href="../usuario/r" th:if="${session.usuario.rol.name() == 'ADMINISTRADOR'}">Gestión de
+								Usuarios</a>
+							<a href="../habitacion/r">Gestión de Habitaciones</a>
+							<a th:href="@{/resena/r}" th:if="${session.usuario.rol.name() == 'EDITOR'}">Gestión de
+								Reseñas</a>
+
+
+							<a href="../reserva/r" th:if="${session.usuario.rol.name() == 'ADMINISTRADOR'}">Gestión de
+								Reservas</a>
+						</div>
+					</div>
+				</nav>
+			</div>
+
+			<!-- Zona derecha: Botones de usuario -->
+			<div class="auth-buttons">
+				<div th:if="${session.usuario != null}">
+					<span class="text-white">Hola, <b th:text="${session.usuario.nombre}">Usuario</b></span>
+					<a href="/usuario/perfil" class="auth-btn">Mi perfil</a>
+					<a href="/usuario/logout" class="auth-btn">Cerrar sesión</a>
+				</div>
+
+				<div th:if="${session.usuario == null}">
+					<a href="/usuario/login" class="auth-btn">Iniciar sesión</a>
+					<a href="/usuario/registro" class="auth-btn register">Registrarse</a>
+				</div>
+			</div>
+
+		</div>
+	</header>
+
+	<script>
+		// Script para toggle menú hamburguesa y desplegable
+		document.addEventListener('DOMContentLoaded', () => {
+			const hamburger = document.getElementById('hamburger-menu');
+			const dropdown = document.getElementById('dropdown-menu');
+
+			function toggleMenu() {
+				hamburger.classList.toggle('active');
+				dropdown.classList.toggle('show');
+			}
+
+			hamburger.addEventListener('click', toggleMenu);
+
+			// Para accesibilidad con teclado (Enter o espacio)
+			hamburger.addEventListener('keydown', e => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					toggleMenu();
+				}
+			});
+
+			// Cerrar menú si se hace click fuera
+			document.addEventListener('click', e => {
+				if (!hamburger.contains(e.target) && !dropdown.contains(e.target)) {
+					hamburger.classList.remove('active');
+					dropdown.classList.remove('show');
+				}
+			});
+		});
+	</script>
+</div>

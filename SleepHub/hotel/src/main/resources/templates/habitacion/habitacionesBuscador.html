@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es">
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Habitaciones Disponibles</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #1e3d59;
+            --color-secondary: #cda34f;
+            --color-success: #28a745;
+            --color-danger: #dc3545;
+            --color-warning: #ffc107;
+            --color-light: #f8f9fa;
+            --color-dark: #343a40;
+            --color-gray: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding: 30px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        h2 {
+            color: var(--color-primary);
+            text-align: center;
+            margin-top: 120px;
+            margin-bottom: 40px;
+            font-size: 2.2rem;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .calendar-table td.vacia {
+            background-color: transparent;
+            color: transparent;
+            border: 1px solid #eee;
+            min-width: 42px;
+            height: 42px;
+            box-sizing: border-box;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: var(--color-secondary);
+            border-radius: 3px;
+        }
+
+        .filtros {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 40px;
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .filtros select {
+            padding: 10px 18px;
+            border-radius: var(--border-radius);
+            border: 1px solid #ddd;
+            font-size: 16px;
+            min-width: 200px;
+            background-color: var(--color-light);
+            transition: var(--transition);
+        }
+
+        .filtros select:focus {
+            outline: none;
+            border-color: var(--color-secondary);
+            box-shadow: 0 0 0 3px rgba(205, 163, 79, 0.2);
+        }
+
+        .filtros button {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .celda-dia {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .filtros button:hover {
+            background-color: var(--color-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .habitaciones-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .tarjeta-habitacion {
+            display: flex;
+            gap: 25px;
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            padding: 0;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .tarjeta-habitacion:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .tarjeta-habitacion img {
+            width: 280px;
+            height: 220px;
+            object-fit: cover;
+            border-radius: var(--border-radius) 0 0 var(--border-radius);
+        }
+
+        .tarjeta-info {
+            flex: 1;
+            padding: 20px;
+            position: relative;
+        }
+
+        .tarjeta-info h4 {
+            margin: 0 0 10px 0;
+            color: var(--color-primary);
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .tarjeta-info p {
+            margin: 8px 0;
+            color: var(--color-gray);
+        }
+
+        .tarjeta-info strong {
+            color: var(--color-dark);
+            font-weight: 600;
+        }
+
+        .estado {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .LIBRE {
+            background-color: var(--color-success);
+            color: white;
+        }
+
+        .OCUPADA {
+            background-color: var(--color-danger);
+            color: white;
+        }
+
+        .PENDIENTE {
+            background-color: var(--color-warning);
+            color: #000;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn-disponible {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-disponible:hover {
+            background-color: var(--color-secondary);
+            color: var(--color-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-reservar {
+            background-color: var(--color-success);
+            color: white;
+        }
+
+        .btn-reservar:hover {
+            background-color: #218838;
+        }
+
+        /* Modal styles */
+        #modalDisponibilidad {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            cursor: pointer;
+            font-size: 28px;
+            color: var(--color-gray);
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--color-danger);
+            transform: rotate(90deg);
+        }
+
+        #tituloModal {
+            color: var(--color-primary);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        #calendarioFechas {
+            max-height: 60vh;
+            overflow-y: auto;
+            padding-right: 15px;
+        }
+
+        .month-container {
+            margin-bottom: 30px;
+        }
+
+        .month-title {
+            text-align: center;
+            margin: 20px 0 15px;
+            color: var(--color-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .calendar-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .calendar-table th {
+            padding: 10px;
+            background-color: var(--color-primary);
+            color: white;
+            font-weight: 500;
+        }
+
+        .calendar-table td {
+            min-width: 42px;
+            height: 42px;
+            box-sizing: border-box;
+        }
+
+
+        .calendar-table td:hover {
+            background-color: #f8f9fa;
+        }
+
+        .disponible {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: var(--color-success);
+            font-weight: 600;
+        }
+
+        .ocupada {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--color-danger);
+        }
+
+        .dia-actual {
+            background-color: var(--color-primary);
+            color: white;
+            font-weight: bold;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+
+        .no-habitaciones {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .no-habitaciones i {
+            font-size: 50px;
+            color: var(--color-gray);
+            margin-bottom: 20px;
+        }
+
+        .no-habitaciones p {
+            font-size: 18px;
+            color: var(--color-gray);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 15px;
+            }
+
+            .tarjeta-habitacion {
+                flex-direction: column;
+            }
+
+            .tarjeta-habitacion img {
+                width: 100%;
+                height: 200px;
+                border-radius: var(--border-radius) var(--border-radius) 0 0;
+            }
+
+            .btn-container {
+                flex-direction: column;
+            }
+
+            .filtros {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px 15px;
+            }
+        }
+
+        .calendar-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+        }
+
+        .calendar-table th,
+        .calendar-table td {
+            width: 14.28%;
+            padding: 5px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .celda-dia {
+            display: inline-block;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Habitaciones Disponibles</h2>
+
+    <form method="get" class="filtros">
+        <select name="tipo">
+            <option value="">Todos los tipos</option>
+            <option value="INDIVIDUAL">Individual</option>
+            <option value="DOBLE">Doble</option>
+            <option value="SUITE">Suite</option>
+        </select>
+
+        <button type="submit">
+            <i class="bi bi-funnel"></i> Filtrar
+        </button>
+    </form>
+
+
+    <div class="habitaciones-grid">
+        <!-- Ejemplo de habitación (en tu código real usarías th:each) -->
+        <div th:each="hab : ${habitaciones}" class="tarjeta-habitacion">
+            <!-- Carrusel -->
+            <div th:id="'carouselHab' + ${hab.id}" class="carousel slide" data-bs-ride="carousel" style="width: 280px;">
+                <div class="carousel-inner">
+                    <div th:each="img, stat : ${hab.imagenes}" class="carousel-item"
+                        th:classappend="${stat.index == 0} ? ' active'">
+                        <img th:src="@{${img.url}}" class="d-block w-100" style="height: 220px; object-fit: cover;" />
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" th:attr="data-bs-target='#carouselHab' + ${hab.id}"
+                    data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" th:attr="data-bs-target='#carouselHab' + ${hab.id}"
+                    data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+
+            <!-- Info de la habitación -->
+            <div class="tarjeta-info">
+                <h4 th:text="${hab.tipo} + ' - ' + ${hab.numero}"></h4>
+                <p th:text="${hab.descripcion}"></p>
+                <p><strong>Precio:</strong> <span th:text="${hab.precio} + ' €'"></span></p>
+                <p><strong>Capacidad:</strong> <span th:text="${hab.capacidad} + ' personas'"></span></p>
+                <p><strong>Estado:</strong>
+                    <span class="estado" th:text="${hab.estadoActual?.toUpperCase()}"
+                        th:classappend="${hab.estadoActual?.toUpperCase()}">
+                    </span>
+                </p>
+
+                <div class="btn-container">
+                    <button class="btn-disponible"
+                        th:attr="onclick=|mostrarDisponibilidad('${hab.tipo}', '${hab.numero}', '${hab.fechasDisponiblesString}')|">
+                        <i class="bi bi-calendar-check"></i> Ver disponibilidad
+                    </button>
+
+                    <a th:href="@{/reserva/nueva(habitacionId=${hab.id})}" class="btn-disponible btn-reservar">
+                        <i class="bi bi-bookmark-plus"></i> Reservar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Puedes agregar más habitaciones de ejemplo aquí -->
+    </div>
+
+    <div id="modalDisponibilidad">
+        <div class="modal-content">
+            <span class="close-modal" onclick="cerrarModal()">&times;</span>
+            <h3 id="tituloModal"></h3>
+            <div id="calendarioFechas"></div>
+        </div>
+    </div>
+
+    <script>
+        function mostrarDisponibilidad(tipo, numero, fechasDisponibles) {
+            document.getElementById('tituloModal').innerText = `Disponibilidad Habitación ${tipo} - ${numero}`;
+            const fechas = fechasDisponibles ? fechasDisponibles.split(',') : [];
+            const fechasSet = new Set(fechas);
+
+            const hoy = new Date();
+            let year = hoy.getFullYear();
+            let month = hoy.getMonth();
+
+            let numMeses = 3; // Mes actual + 2 siguientes
+            let html = '';
+
+            for (let m = 0; m < numMeses; m++) {
+                let fechaMes = new Date(year, month + m, 1);
+                let mesActual = fechaMes.getMonth();
+                let anioActual = fechaMes.getFullYear();
+
+                html += `<div class="month-container">
+           <h4 class="month-title">${fechaMes.toLocaleString('es-ES', { month: 'long', year: 'numeric' })}</h4>
+           <table class="calendar-table"><tr>`;
+
+                // Días de la semana correctamente definidos
+                const diasSemana = ['Lun', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+                diasSemana.forEach(d => html += `<th>${d}</th>`);
+                html += '</tr><tr>';
+
+                // Obtener el primer día del mes (0=Dom, 1=Lun, ..., 6=Sáb)
+                let primerDiaSemana = new Date(anioActual, mesActual, 1).getDay();
+
+                // Convertir a formato Lunes=0 a Domingo=6
+                let espaciosIniciales = primerDiaSemana === 0 ? 6 : primerDiaSemana - 1;
+
+                // Espacios vacíos antes del primer día
+                for (let i = 0; i < espaciosIniciales; i++) {
+                    html += '<td class="vacia"><div class="celda-dia">&nbsp;</div></td>';
+                }
+
+                // Días del mes
+                let ultimoDiaMes = new Date(anioActual, mesActual + 1, 0).getDate();
+                let diaSemana = espaciosIniciales;
+
+                for (let dia = 1; dia <= ultimoDiaMes; dia++) {
+                    const fechaActual = new Date(anioActual, mesActual, dia);
+                    const hoySinHoras = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+
+                    // Solo mostrar días futuros o del mes actual
+                    if (m > 0 || fechaActual >= hoySinHoras) {
+                        const fechaStr = `${anioActual}-${String(mesActual + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+                        let clase = fechasSet.has(fechaStr) ? 'disponible' : 'ocupada';
+                        const esHoy = dia === hoy.getDate() && mesActual === hoy.getMonth() && anioActual === hoy.getFullYear();
+                        const diaContent = esHoy ? `<span class="dia-actual">${dia}</span>` : dia;
+                        html += `<td class="${clase}"><div class="celda-dia">${diaContent}</div></td>`;
+                    } else {
+                        html += '<td class="vacia"><div class="celda-dia">&nbsp;</div></td>';
+                    }
+
+                    diaSemana++;
+                    if (diaSemana > 6) {
+                        html += '</tr><tr>';
+                        diaSemana = 0;
+                    }
+                }
+
+                // Completar la última fila con celdas vacías si es necesario
+                if (diaSemana > 0 && diaSemana < 7) {
+                    for (let i = diaSemana; i < 7; i++) {
+                        html += '<td class="vacia"><div class="celda-dia">&nbsp;</div></td>';
+                    }
+                }
+
+
+                html += '</tr></table></div>';
+            }
+
+            html += `
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: rgba(40, 167, 69, 0.2);"></div>
+            <span>Disponible</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: rgba(220, 53, 69, 0.1);"></div>
+            <span>Ocupada</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: var(--color-primary);"></div>
+            <span>Hoy</span>
+        </div>
+    </div>
+    `;
+
+            document.getElementById('calendarioFechas').innerHTML = html;
+            document.getElementById('modalDisponibilidad').style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalDisponibilidad').style.display = 'none';
+        }
+
+        // Cerrar modal al hacer clic fuera del contenido
+        document.getElementById('modalDisponibilidad').addEventListener('click', function (e) {
+            if (e.target === this) {
+                cerrarModal();
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,209 @@
+<style>
+    .carousel-container {
+        position: relative;
+        max-width: 250px;
+        overflow: hidden;
+    }
+
+    .carousel-images {
+        display: flex;
+        transition: transform 0.3s ease;
+    }
+
+    .carousel-images img {
+        flex-shrink: 0;
+        width: 250px;
+        height: 250px;
+        user-select: none;
+    }
+
+    .carousel-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgba(30, 61, 89, 0.7);
+        color: white;
+        border: none;
+        padding: 4px 10px;
+        cursor: pointer;
+        font-size: 18px;
+        border-radius: 3px;
+        user-select: none;
+    }
+
+    .carousel-btn.prev {
+        left: 5px;
+    }
+
+    .carousel-btn.next {
+        right: 5px;
+    }
+
+    .text-danger {
+        color: #b22222;
+        font-weight: bold;
+    }
+
+    /* Estilos para alertas */
+    .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .col-id {
+        width: 80px;
+        max-width: 80px;
+        white-space: nowrap;
+    }
+
+    .col-tipo {
+        width: 100px;
+        max-width: 100px;
+        white-space: nowrap;
+    }
+
+    .col-numero {
+        width: 80px;
+        max-width: 80px;
+        white-space: nowrap;
+    }
+
+    .col-capacidad {
+        width: 80px;
+        max-width: 80px;
+        white-space: nowrap;
+    }
+
+    .col-descripcion {
+        width: 300px;
+        max-width: 300px;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        overflow: hidden;
+    }
+
+    .col-acciones {
+        width: 200px;
+        max-width: 200px;
+        white-space: nowrap;
+    }
+</style>
+
+<div class="container" style="margin-top: 40px;">
+    <h1>Lista de habitaciones</h1>
+
+    <!-- Bloque para alertas -->
+    <div th:if="${msg != null}">
+        <div th:classappend="${msgType == 'success'} ? 'alert alert-success' : 'alert alert-danger'" th:text="${msg}">
+        </div>
+    </div>
+
+    <a href="/habitacion/c">Crear nueva habitación</a>
+    <br /><br />
+
+    <table class="table table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th></th>
+                <th>ID</th>
+                <th>Número</th>
+                <th>Tipo</th>
+                <th>Capacidad</th>
+                <th>Descripción</th>
+                <th>Precio (€)</th>
+                <th>Imagen</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="h : ${habitaciones}">
+                <td class="col-id" th:text="${h.id}"></td>
+                <td class="col-numero" th:text="${h.numero}"></td>
+                <td class="col-tipo" th:text="${h.tipo}"></td>
+                <td class="col-capacidad" th:text="${h.capacidad}"></td>
+                <td class="col-descripcion" th:text="${h.descripcion}"></td>
+                <td th:text="${h.precio}"></td>
+                <td style="width: 250px;">
+                    <div class="carousel-container" style="max-width: 250px; position: relative; overflow: hidden;">
+                        <div class="carousel-images" style="display: flex; transition: transform 0.3s ease;">
+                            <img th:if="${#lists.isEmpty(h.imagenes)}" th:src="@{/img/habitacion-default.jpg}"
+                                alt="Imagen por defecto" width="250" style="flex-shrink: 0;" />
+                            <img th:each="img : ${h.imagenes}" th:src="@{${img.url}}" alt="Imagen habitación"
+                                width="250" style="flex-shrink: 0;" />
+                        </div>
+                        <button class="carousel-btn prev" type="button" aria-label="Anterior"
+                            style="position: absolute; top: 50%; left: 0; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none;">&lt;</button>
+                        <button class="carousel-btn next" type="button" aria-label="Siguiente"
+                            style="position: absolute; top: 50%; right: 0; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none;">&gt;</button>
+                    </div>
+                </td>
+
+                <td class="col-acciones">
+                    <form th:action="@{/habitacion/u}" method="get" style="display:inline">
+                        <input type="hidden" name="id" th:value="${h.id}" />
+                        <input type="submit" value="Editar" />
+                    </form>
+                    <!-- Si la habitación tiene reservas -->
+                    <div th:if="${not #lists.isEmpty(h.reservas)}" class="text-danger" style="font-size: 14px;">
+                        Tiene reservas activas<br />
+                        <button disabled style="opacity: 0.5;">Eliminar</button>
+                    </div>
+
+                    <!-- Si no tiene reservas, mostrar el botón de eliminar -->
+                    <form th:if="${#lists.isEmpty(h.reservas)}" th:action="@{/habitacion/d}" method="post"
+                        style="display:inline">
+                        <input type="hidden" name="id" th:value="${h.id}" />
+                        <input type="submit" value="Eliminar" onclick="return confirm('¿Estás seguro?')" />
+                    </form>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".carousel-container").forEach(container => {
+            const images = container.querySelector(".carousel-images");
+            const imageCount = images.children.length;
+            let index = 0;
+
+            const prevBtn = container.querySelector(".prev");
+            const nextBtn = container.querySelector(".next");
+
+            const updateCarousel = () => {
+                images.style.transform = `translateX(-${index * 250}px)`;
+            };
+
+            prevBtn.addEventListener("click", () => {
+                if (index > 0) {
+                    index--;
+                    updateCarousel();
+                }
+            });
+
+            nextBtn.addEventListener("click", () => {
+                if (index < imageCount - 1) {
+                    index++;
+                    updateCarousel();
+                }
+            });
+        });
+    });
+</script>
